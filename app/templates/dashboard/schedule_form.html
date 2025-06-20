@@ -1,0 +1,91 @@
+{% extends "base.html" %}
+
+{% block title %}{{ 'Edit' if form.contacted_school.data else 'Add' }} Schedule{% endblock %}
+
+{% block content %}
+    <h2>Schedule for: <strong>{{ school.school_name }}</strong></h2>
+    <form method="POST" action="">
+        {{ form.hidden_tag() }}
+
+        <div class="form-group">
+            {{ form.contacted_school.label }} {{ form.contacted_school(onclick="toggleForm()") }}
+        </div>
+
+        <div id="not_contacted_reason" style="display: none;">
+            <div class="form-group">
+                {{ form.reason_if_not_contacted.label(class="form-label") }}
+                {{ form.reason_if_not_contacted(rows=4, class="form-control") }}
+            </div>
+        </div>
+
+        <div id="contacted_form" style="display: none;">
+            <div class="form-group">
+                {{ form.school_unavailable.label }} {{ form.school_unavailable(onclick="toggleAvailability()") }}
+            </div>
+
+            <div id="unavailable_reason" style="display: none;">
+                <div class="form-group">
+                    {{ form.reason_if_unavailable.label(class="form-label") }}
+                    {{ form.reason_if_unavailable(rows=4, class="form-control") }}
+                </div>
+            </div>
+
+            <div id="schedule_details" style="display: none;">
+                <p>Please fill in the details agreed upon with the headmaster.</p>
+                <div class="form-group">
+                    {{ form.headmaster_name_on_schedule.label(class="form-label") }}
+                    {{ form.headmaster_name_on_schedule(class="form-control") }}
+                </div>
+                <div class="form-group">
+                    {{ form.headmaster_contact_on_schedule.label(class="form-label") }}
+                    {{ form.headmaster_contact_on_schedule(class="form-control") }}
+                </div>
+                <div class="form-group">
+                    {{ form.scheduled_date.label(class="form-label") }}
+                    {{ form.scheduled_date(class="form-control", max="2025-07-06") }}
+                </div>
+            </div>
+        </div>
+        
+        <div class="form-group">
+            {{ form.submit(class="btn btn-primary") }}
+            <a href="{{ url_for('dashboard.add_edit_schedule') }}" class="btn" style="background-color: #6c757d;">Cancel</a>
+        </div>
+    </form>
+
+    <script>
+        const contactedCheckbox = document.getElementById('contacted_school');
+        const notContactedDiv = document.getElementById('not_contacted_reason');
+        const contactedDiv = document.getElementById('contacted_form');
+
+        const unavailableCheckbox = document.getElementById('school_unavailable');
+        const unavailableDiv = document.getElementById('unavailable_reason');
+        const scheduleDetailsDiv = document.getElementById('schedule_details');
+
+        function toggleAvailability() {
+            if (unavailableCheckbox.checked) {
+                unavailableDiv.style.display = 'block';
+                scheduleDetailsDiv.style.display = 'none';
+            } else {
+                unavailableDiv.style.display = 'none';
+                scheduleDetailsDiv.style.display = 'block';
+            }
+        }
+
+        function toggleForm() {
+            if (contactedCheckbox.checked) {
+                contactedDiv.style.display = 'block';
+                notContactedDiv.style.display = 'none';
+                toggleAvailability(); // Also check the sub-form state
+            } else {
+                contactedDiv.style.display = 'none';
+                notContactedDiv.style.display = 'block';
+            }
+        }
+
+        // Run on page load to set the initial correct state
+        document.addEventListener('DOMContentLoaded', function() {
+            toggleForm();
+        });
+    </script>
+{% endblock %}

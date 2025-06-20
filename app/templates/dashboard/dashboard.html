@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard{% endblock %}
+
+{% block content %}
+    <h2>Welcome, {{ current_user.pair_name }}</h2>
+    <p>Select an option below to manage your monitoring schedules.</p>
+
+    <div class="card-container">
+        <div class="card">
+            <h3>Assigned Schools</h3>
+            <p>View the list of schools assigned to your pair, including head teacher information.</p>
+            <a href="{{ url_for('dashboard.assigned_schools') }}" class="btn">View Schools</a>
+        </div>
+        <div class="card">
+            <h3>View Schedule</h3>
+            <p>See your current schedule for data collection and download it.</p>
+            <a href="{{ url_for('dashboard.view_schedule') }}" class="btn">View Schedule</a>
+        </div>
+        <div class="card">
+            <h3>Add/Edit Schedule</h3>
+            <p>Add a new schedule or make changes to an existing one for your assigned schools.</p>
+            <a href="{{ url_for('dashboard.add_edit_schedule') }}" class="btn">Add/Edit Schedule</a>
+        </div>
+    </div>
+    <div style="margin-top: 2rem;">
+         <a href="{{ url_for('auth.logout') }}" class="btn btn-danger">Logout</a>
+    </div>
+{% endblock %}

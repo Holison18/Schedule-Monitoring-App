@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+
+{% block title %}User Login{% endblock %}
+
+{% block content %}
+<div class="login-container">
+    <form method="POST" action="{{ url_for('auth.login') }}">
+        <h2>User Login</h2>
+        {{ form.hidden_tag() }}
+        <div class="form-group">
+            {{ form.pair.label }}
+            {{ form.pair(class="form-control") }}
+        </div>
+        <div class="form-group">
+            {{ form.email.label }}
+            {{ form.email(class="form-control", placeholder="Enter your email address") }}
+        </div>
+        <div class="form-group">
+            {{ form.submit(class="btn btn-primary") }}
+        </div>
+    </form>
+</div>
+{% endblock %}

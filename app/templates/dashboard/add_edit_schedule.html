@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+
+{% block title %}Add/Edit Schedule{% endblock %}
+
+{% block content %}
+    <h2>Add or Edit a Schedule</h2>
+    <p>Select a school to add or edit its schedule. Remember, only the person who creates a schedule can edit it.</p>
+    <table>
+        <thead>
+            <tr>
+                <th>School Name</th>
+                <th>Status</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for school in schools %}
+            <tr>
+                <td>{{ school.school_name }}</td>
+                <td>
+                    {% if school.schedule %}
+                        <span style="color: var(--success-color);">Scheduled</span>
+                    {% else %}
+                        <span style="color: var(--danger-color);">Not Scheduled</span>
+                    {% endif %}
+                </td>
+                <td>
+                    {% if school.schedule %}
+                        {# Check if current user is the creator to allow editing #}
+                        {% if school.schedule.created_by == current_user.user1_email or school.schedule.created_by == current_user.user2_email %}
+                             <a href="{{ url_for('dashboard.schedule_for_school', school_id=school.id) }}" class="btn">Edit Schedule</a>
+                        {% else %}
+                             <a href="{{ url_for('dashboard.schedule_for_school', school_id=school.id) }}" class="btn">View Schedule</a>
+                        {% endif %}
+                    {% else %}
+                        <a href="{{ url_for('dashboard.schedule_for_school', school_id=school.id) }}" class="btn btn-primary">Add Schedule</a>
+                    {% endif %}
+                </td>
+            </tr>
+            {% else %}
+            <tr>
+                <td colspan="3">No schools have been assigned to your pair.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+     <a href="{{ url_for('dashboard.index') }}" style="margin-top: 1rem; display: inline-block;">&larr; Back to Dashboard</a>
+{% endblock %}

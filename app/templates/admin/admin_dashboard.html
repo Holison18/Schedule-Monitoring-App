@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+
+{% block title %}Admin Dashboard{% endblock %}
+
+{% block content %}
+    <div style="display: flex; justify-content: space-between; align-items: center;">
+        <h2>Admin Dashboard: All Schedules</h2>
+        <a href="{{ url_for('admin.download_all_schedules') }}" class="btn btn-primary">Download All as CSV</a>
+    </div>
+
+    <table>
+        <thead>
+            <tr>
+                <th>Pair Name</th>
+                <th>School Name</th>
+                <th>Scheduled Date</th>
+                <th>Contacted?</th>
+                <th>School Available?</th>
+                <th>Reason/Notes</th>
+                <th>Created By</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for schedule in schedules %}
+            <tr>
+                <td>{{ schedule.pair.pair_name }}</td>
+                <td>{{ schedule.school.school_name }}</td>
+                <td>{{ schedule.scheduled_date.strftime('%Y-%m-%d') if schedule.scheduled_date else 'N/A' }}</td>
+                <td>{{ 'Yes' if schedule.contacted_school else 'No' }}</td>
+                <td>
+                    {% if schedule.contacted_school %}
+                        {{ 'No' if schedule.school_unavailable else 'Yes' }}
+                    {% else %}
+                        N/A
+                    {% endif %}
+                </td>
+                <td>
+                    {% if not schedule.contacted_school %}
+                        {{ schedule.reason_if_not_contacted }}
+                    {% elif schedule.school_unavailable %}
+                        {{ schedule.reason_if_unavailable }}
+                    {% else %}
+                        -
+                    {% endif %}
+                </td>
+                <td>{{ schedule.created_by }}</td>
+            </tr>
+            {% else %}
+            <tr>
+                <td colspan="7">No schedules have been submitted by any pair yet.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+{% endblock %}

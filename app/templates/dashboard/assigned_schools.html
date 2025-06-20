@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+
+{% block title %}Assigned Schools{% endblock %}
+
+{% block content %}
+<div style="display: flex; justify-content: space-between; align-items: center;">
+    <h2>Assigned Schools</h2>
+    <button onclick="window.print()" class="btn">Print Information</button>
+</div>
+
+<p>Below are the schools assigned to your pair: <strong>{{ current_user.pair_name }}</strong>.</p>
+
+<div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 1rem; margin-top: 1rem;">
+    {% for school in schools %}
+    <div style="border: 1px solid #ccc; border-radius: 8px; padding: 1rem; background-color: #f9f9ff; box-shadow: 0 2px 5px rgba(0,0,0,0.1);">
+        <h3 style="margin: 0 0 0.5rem 0; color: #005f99;">{{ school.school_name }}</h3>
+        <p><strong>Location:</strong> {{ school.location or 'N/A' }}</p>
+        <p><strong>District:</strong> {{ school.district or 'N/A' }}</p>
+        <p><strong>Region:</strong> {{ school.region or 'N/A' }}</p>
+        <p><strong>Code:</strong> {{ school.school_code or 'N/A' }}</p>
+
+        
+        <p><strong>Head Teacher:</strong> {{ school.head_teacher_name or 'N/A' }}</p>
+        <p><strong>Contact:</strong> {{ school.head_teacher_contact or 'N/A' }}</p>
+    </div>
+    {% else %}
+    <p>No schools have been assigned to your pair yet.</p>
+    {% endfor %}
+</div>
+
+<a href="{{ url_for('dashboard.index') }}" style="margin-top: 1.5rem; display: inline-block;">&larr; Back to Dashboard</a>
+{% endblock %}
