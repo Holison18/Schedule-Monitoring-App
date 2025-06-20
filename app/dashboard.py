@@ -33,19 +33,27 @@ def add_edit_schedule():
 def schedule_for_school(school_id):
     school = School.query.get_or_404(school_id)
     schedule = school.schedule
-    if schedule and schedule.created_by != current_user.user1_email and schedule.created_by != current_user.user2_email:
+
+    # Prevent editing if not created by current user
+    if schedule and schedule.created_by.lower() != current_user.email.lower():
         flash('You are not authorized to edit this schedule.', 'danger')
         return redirect(url_for('dashboard.add_edit_schedule'))
 
     form = ScheduleForm(obj=schedule)
-    
+
     if form.validate_on_submit():
         if not schedule:
-            schedule = Schedule(school_id=school.id, pair_id=current_user.id, created_by=current_user.user1_email) # Or logic to get current user email
+            schedule = Schedule(
+                school_id=school.id,
+                pair_id=current_user.id,
+                created_by=current_user.user1_email.lower(),  # Lowercased for consistency
+                created_at=datetime.utcnow()  # Automatically set on creation
+            )
             db.session.add(schedule)
 
         form.populate_obj(schedule)
-        schedule.updated_at = datetime.utcnow()
+        schedule.updated_at = datetime.utcnow()  # Automatically updated on edit
+
         db.session.commit()
         flash('Schedule has been updated.', 'success')
         return redirect(url_for('dashboard.view_schedule'))
