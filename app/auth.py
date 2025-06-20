@@ -6,7 +6,7 @@ from .models import Pair, db
 
 auth = Blueprint('auth', __name__)
 
-@auth.route('/login', methods=['GET', 'POST'])
+@auth.route('/', methods=['GET', 'POST'])
 def login():
     form = LoginForm()
     form.pair.choices = [(p.id, p.pair_name) for p in Pair.query.order_by('pair_name').all()]
