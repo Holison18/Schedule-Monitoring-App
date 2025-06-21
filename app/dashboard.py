@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template, redirect, url_for, flash, Response
+from flask import Blueprint, render_template, redirect, url_for, flash, Response,session
 from flask_login import login_required, current_user
 from .models import db, School, Schedule
 from .forms import ScheduleForm
@@ -34,8 +34,8 @@ def schedule_for_school(school_id):
     school = School.query.get_or_404(school_id)
     schedule = school.schedule
 
-    # Prevent editing if not created by current user
-    if schedule and schedule.created_by.lower() != current_user.email.lower():
+    # Authorization check: only the creator can edit
+    if schedule and schedule.created_by.lower() != session['logged_in_email']:
         flash('You are not authorized to edit this schedule.', 'danger')
         return redirect(url_for('dashboard.add_edit_schedule'))
 
@@ -46,13 +46,13 @@ def schedule_for_school(school_id):
             schedule = Schedule(
                 school_id=school.id,
                 pair_id=current_user.id,
-                created_by=current_user.user1_email.lower(),  # Lowercased for consistency
-                created_at=datetime.utcnow()  # Automatically set on creation
+                created_by=session['logged_in_email'],  # Use the logged-in user's email
+                created_at=datetime.utcnow()
             )
             db.session.add(schedule)
 
         form.populate_obj(schedule)
-        schedule.updated_at = datetime.utcnow()  # Automatically updated on edit
+        schedule.updated_at = datetime.utcnow()
 
         db.session.commit()
         flash('Schedule has been updated.', 'success')

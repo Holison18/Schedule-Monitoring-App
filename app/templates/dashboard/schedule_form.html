@@ -1,74 +1,122 @@
 {% extends "base.html" %}
 
-{% block title %}{{ 'Edit' if form.contacted_school.data == 'yes' else 'Add' }} Schedule{% endblock %}
+{% block title %}{{ 'Edit' if schedule else 'Add' }} Schedule{% endblock %}
 
 {% block content %}
-<h2>Schedule for: <strong>{{ school.school_name }}</strong></h2>
+<h1>Schedule for {{ school.school_name }}</h1>
 
-<form method="POST">
+<form method="POST" action="">
     {{ form.hidden_tag() }}
 
+    <!-- Hide the original contacted_school checkbox -->
+    <!-- This is the BooleanField from forms.py, rendered as a checkbox -->
+    <!-- We hide it with CSS so the user doesn’t see it, but it’s still part of the form -->
+    {{ form.contacted_school(style="display: none;") }}
+
+    <!-- Custom radio buttons for "Yes" and "No" -->
     <div class="form-group">
-        <label>{{ form.contacted_school.label }}</label><br>
-        {% for subfield in form.contacted_school %}
-            <label style="margin-right: 15px;">
-                {{ subfield() }} {{ subfield.label.text }}
-            </label>
-        {% endfor %}
+        <label class="form-label">Have you contacted the school?</label><br>
+        <!-- Radio button for "Yes" -->
+        <label style="margin-right: 15px;">
+            <input type="radio" name="contacted_school_radio" value="True" onclick="setContactedSchool(true)"> Yes
+        </label>
+        <!-- Radio button for "No" -->
+        <label style="margin-right: 15px;">
+            <input type="radio" name="contacted_school_radio" value="False" onclick="setContactedSchool(false)"> No
+        </label>
     </div>
 
-    <div id="not_contacted_reason" style="display: none;">
-        <div class="form-group">
-            {{ form.reason_if_not_contacted.label(class="form-label") }}
-            {{ form.reason_if_not_contacted(rows=4, class="form-control") }}
-        </div>
-    </div>
-
-    <div id="schedule_details" style="display: none;">
+    <!-- Fields shown when "Yes" is selected -->
+    <div id="yes_fields" class="form-group" style="display: none;">
         <p>Please fill in the details agreed upon with the headmaster.</p>
         <div class="form-group">
             {{ form.headmaster_name_on_schedule.label(class="form-label") }}
-            {{ form.headmaster_name_on_schedule(class="form-control", required=True) }}
+            {{ form.headmaster_name_on_schedule(class="form-control") }}
+            {% for error in form.headmaster_name_on_schedule.errors %}
+                <span class="text-danger">{{ error }}</span>
+            {% endfor %}
         </div>
         <div class="form-group">
             {{ form.headmaster_contact_on_schedule.label(class="form-label") }}
-            {{ form.headmaster_contact_on_schedule(class="form-control", required=True) }}
+            {{ form.headmaster_contact_on_schedule(class="form-control") }}
+            {% for error in form.headmaster_contact_on_schedule.errors %}
+                <span class="text-danger">{{ error }}</span>
+            {% endfor %}
         </div>
         <div class="form-group">
             {{ form.scheduled_date.label(class="form-label") }}
-            {{ form.scheduled_date(class="form-control", required=True, max="2025-07-06") }}
+            {{ form.scheduled_date(class="form-control", max="2025-07-06") }}
+            {% for error in form.scheduled_date.errors %}
+                <span class="text-danger">{{ error }}</span>
+            {% endfor %}
         </div>
     </div>
 
+    <!-- Field shown when "No" is selected -->
+    <div id="no_fields" class="form-group" style="display: none;">
+        <div class="form-group">
+            {{ form.reason_if_not_contacted.label(class="form-label") }}
+            {{ form.reason_if_not_contacted(rows=4, class="form-control") }}
+            {% for error in form.reason_if_not_contacted.errors %}
+                <span class="text-danger">{{ error }}</span>
+            {% endfor %}
+        </div>
+    </div>
+
+    <!-- Submit and Cancel buttons -->
     <div class="form-group">
         {{ form.submit(class="btn btn-primary") }}
-        <a href="{{ url_for('dashboard.add_edit_schedule') }}" class="btn" style="background-color: #6c757d;">Cancel</a>
+        <a href="{{ url_for('dashboard.add_edit_schedule') }}" class="btn btn-secondary">Cancel</a>
     </div>
 </form>
 
+<!-- JavaScript to handle radio button selections and form initialization -->
 <script>
-    const contactedRadios = document.getElementsByName("contacted_school");
-    const notContactedDiv = document.getElementById("not_contacted_reason");
-    const scheduleDetailsDiv = document.getElementById("schedule_details");
+    // Function to set the hidden checkbox and toggle fields
+    function setContactedSchool(isContacted) {
+        // Get the hidden checkbox
+        const checkbox = document.querySelector('input[name="contacted_school"]');
+        // Get the divs for Yes and No fields
+        const yesFields = document.getElementById('yes_fields');
+        const noFields = document.getElementById('no_fields');
 
-    function toggleForm() {
-        const selected = Array.from(contactedRadios).find(r => r.checked)?.value;
-        if (selected === "yes") {
-            notContactedDiv.style.display = "none";
-            scheduleDetailsDiv.style.display = "block";
-        } else if (selected === "no") {
-            notContactedDiv.style.display = "block";
-            scheduleDetailsDiv.style.display = "none";
-        } else {
-            notContactedDiv.style.display = "none";
-            scheduleDetailsDiv.style.display = "none";
+        // Set the checkbox’s checked property: true for "Yes", false for "No"
+        checkbox.checked = isContacted;
+
+        // Show Yes fields and hide No fields if "Yes" is selected
+        if (isContacted) {
+            yesFields.style.display = 'block';
+            noFields.style.display = 'none';
+        } 
+        // Show No fields and hide Yes fields if "No" is selected
+        else {
+            yesFields.style.display = 'none';
+            noFields.style.display = 'block';
         }
     }
 
-    // Initial run
-    document.addEventListener('DOMContentLoaded', toggleForm);
-    contactedRadios.forEach(radio => {
-        radio.addEventListener("change", toggleForm);
+    // Initialize the form when the page loads
+    document.addEventListener('DOMContentLoaded', function() {
+        // Get the hidden checkbox and radio buttons
+        const checkbox = document.querySelector('input[name="contacted_school"]');
+        const yesRadio = document.querySelector('input[name="contacted_school_radio"][value="True"]');
+        const noRadio = document.querySelector('input[name="contacted_school_radio"][value="False"]');
+        const yesFields = document.getElementById('yes_fields');
+        const noFields = document.getElementById('no_fields');
+
+        // Check the initial state of the checkbox (from the schedule data)
+        if (checkbox.checked) {
+            // If checkbox is checked (True), select "Yes" and show Yes fields
+            yesRadio.checked = true;
+            yesFields.style.display = 'block';
+            noFields.style.display = 'none';
+        } else {
+            // If checkbox is unchecked (False), select "No" and show No fields
+            noRadio.checked = true;
+            yesFields.style.display = 'none';
+            noFields.style.display = 'block';
+        }
     });
 </script>
+
 {% endblock %}

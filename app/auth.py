@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template, redirect, url_for, flash
+from flask import Blueprint, render_template, redirect, url_for, flash,session
 from flask_login import login_user, logout_user, login_required
 
 from .forms import LoginForm
@@ -14,6 +14,8 @@ def login():
         pair = Pair.query.get(form.pair.data)
         if pair and (pair.user1_email == form.email.data.lower() or pair.user2_email == form.email.data.lower()):
             login_user(pair)
+            # Store the email used to log in
+            session['logged_in_email'] = form.email.data.lower()
             return redirect(url_for('dashboard.index'))
         else:
             flash('Invalid login credentials.', 'danger')
@@ -23,4 +25,5 @@ def login():
 @login_required
 def logout():
     logout_user()
+    session.pop('logged_in_email', None)  # Remove the email from the session
     return redirect(url_for('auth.login'))
